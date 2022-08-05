@@ -50,4 +50,5 @@ int main()
     cout << "\n\n\n"
          << "[ "<< output[0] << " , " << output[1] << " ] Sum : " << max_profits << endl <<
          "The number of ranges that the program checked : " << number_of_checked_ranges << endl;
+    return 0;
 }
