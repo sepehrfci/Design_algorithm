@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb-food-ration
+    ports:
+      - "$DB_PORT:27017"
+    volumes:
+      - dbdata:/data/db
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $DB_USER
+      MONGO_INITDB_ROOT_PASSWORD: $DB_PASS
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --eval
+        - "db.adminCommand('ping')"
+    restart: unless-stopped
+
+  mongo-express:
+    container_name: mongo-express-food-ration
+    image: mongo-express
+    restart: always
+    ports:
+      - 8082:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: $DB_USER
+      ME_CONFIG_MONGODB_ADMINPASSWORD: $DB_PASS
+      ME_CONFIG_MONGODB_URL: mongodb://$DB_USER:$DB_PASS@mongodb:$DB_PORT/
+      ME_CONFIG_BASICAUTH: false
+
+  node-app:
+    image: nodejs:v1.0.3
+    ports:
+      - "$PORT:$PORT"
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+    environment:
+      PORT: $PORT
+    restart: unless-stopped
+
+  # admin-app:
+  #   image: frm-admin:v1.0.1
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - node-app
+  #   environment:
+  #     NEXT_PUBLIC_API_URL: http://172.21.0.4:7080
+  #     NEXTAUTH_URL: http://172.21.0.5:3000
+  #     NEXTAUTH_SECRET: my-secret-key
+  #   restart: unless-stopped
+
+volumes:
+  dbdata:
